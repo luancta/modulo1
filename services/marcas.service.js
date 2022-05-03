@@ -1,4 +1,7 @@
 import marcasRepository from "../repositories/marcas.repository.js";
+import { promises as fs } from "fs";
+
+const { readFile } = fs;
 
 async function getMarcaByParams(data, ordem, limit) {
   let list = [];
@@ -49,25 +52,23 @@ async function getMarcaByParams(data, ordem, limit) {
   return list;
 }
 
-async function listaModelos(req, res, data) {
+async function listaModelos(body, data) {
   try {
-    let body = req.body;
     if (body?.nomeMarca?.length < 1) {
       res.status(405).send("Parâmetros de busca inválidos");
     }
-    const marca = marcasRepository.getMarcas.find((brand) => {
+    const marca = JSON.parse(data).find((brand) => {
       if (brand["brand"].toLowerCase() === body.nomeMarca.toLowerCase()) {
         return brand["models"];
       }
     });
     if (marca) {
-      res.status(200).send(JSON.stringify(marca["models"]));
+      return marca;
     } else {
-      res.status(404).send([]);
+      return null;
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send({ error: err.message });
   }
 }
 
